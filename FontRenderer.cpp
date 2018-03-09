@@ -56,7 +56,7 @@ void MemoryScreen::init(HWND hWnd)
 	ReleaseDC(hWnd, hdc);
 }
 
-#include "upng.h"
+//#include "upng.h"
 
 void draw(HDC hdc)
 {
