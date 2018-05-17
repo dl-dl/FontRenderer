@@ -155,13 +155,16 @@ static void outputOneChar(HDC hdc, WCHAR c, int h, int bytesH, int w, FILE* out)
 				b--;
 			}
 		}
-		if (b--)
+		if (b)
+		{
 			fprintf(out, n ? " 0x%X," : " %u,", n);
+			b--;
+		}
 		ASSERT_DBG(b == 0);
 	}
 }
 
-static void outputStruct(FILE* out, int h, int w, int numBlocks)
+static void outputStruct(FILE* out, int numBlocks)
 {
 	fprintf(out, "#ifndef __DEVFONT_H__\n");
 	fprintf(out, "#define __DEVFONT_H__\n\n");
@@ -210,11 +213,15 @@ static void outputRasterFont(HDC hdc)
 		{ 32, 126 - 32 }, { 0x410, 64 },
 	};
 
-	FILE* out = fopen("devfont.h", "wb");
 
-	int maxW = 0;
 	const size_t numBlocks = sizeof(ranges) / sizeof(*ranges);
 	ASSERT_DBG(numBlocks);
+
+	FILE* out = fopen("devfont.h", "wb");
+	outputStruct(out, numBlocks);
+	fclose(out);
+
+	int maxW = 0;
 	for (size_t i = 0; i < numBlocks; ++i)
 	{
 		int w = maxCharWidth(hdc, ranges[i].base, ranges[i].sz);
@@ -222,10 +229,6 @@ static void outputRasterFont(HDC hdc)
 			maxW = w;
 	}
 	int h = charHeight(hdc, ranges[0].base);
-
-	outputStruct(out, h, maxW, numBlocks);
-
-	fclose(out);
 
 	char s[64];
 	sprintf(s, "devfont%ux%u.c", h, maxW);
